@@ -59,11 +59,24 @@ database.ref().on("child_added", function(childSnapshot) {
 	
 	var trainEntry = $("<div>").addClass("col-md-12");
 
+	var covertedFirstTime = moment(childSnapshot.val().firstTime, "hh:mm").subtract(1, "years");
+
+	var diffTime = moment().diff(covertedFirstTime, "minutes");
+
+	var tRemainder = diffTime % childSnapshot.val().frequency;
+
+	// 16 - 00 = 16
+	// 16 % 7 = 2 (Modulus is the remainder)
+	// 7 - 2 = 5 minutes away
+	// 5 + 3:16 = 3:21
+	var tMinutesTillTrain = childSnapshot.val().frequency - tRemainder;
+	var nextTrain = moment().add(tMinutesTillTrain, "minutes")
+
 	trainEntry.append($("<div>").addClass("col-md-5ths").text(childSnapshot.val().trainName));
 	trainEntry.append($("<div>").addClass("col-md-5ths").text(childSnapshot.val().destination));
-	trainEntry.append($("<div>").addClass("col-md-5ths").text(childSnapshot.val().firstTime));
 	trainEntry.append($("<div>").addClass("col-md-5ths").text(childSnapshot.val().frequency));
-	trainEntry.append($("<div>").addClass("col-md-5ths").text(childSnapshot.val().dateAdded));
+	trainEntry.append($("<div>").addClass("col-md-5ths").text(nextTrain.format("hh:mm a")));
+	trainEntry.append($("<div>").addClass("col-md-5ths").text(tMinutesTillTrain));
 
 	$("#trains").append($("<div class='row trainrow'>").append(trainEntry));
 }, function(errorObject) {
